@@ -53,7 +53,6 @@ const quantity = document.getElementById("quantity");
 let basketLists = [];
 
 
-
 //Variable action -> popup de confirmation de démarche à suivre
 const popupConfirmation = () =>{
     if(window.confirm(` L'article ${title.innerHTML} au prix de ${price.innerHTML} € a bien été ajouté au panier.
@@ -61,7 +60,6 @@ const popupConfirmation = () =>{
         window.location.href = "cart.html";
     }
 };
-
 
 const button = document.getElementById("addToCart")
 
@@ -92,8 +90,6 @@ const button = document.getElementById("addToCart")
             basketLists.push(infoCart);
             localStorage.setItem ("infoCart",JSON.stringify(basketLists));
             popupConfirmation();     
-            console.log("Je suis la 3")
-            console.log(basketLists)
         }
 
     //-------------------------------------------------------------------------------------        

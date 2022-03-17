@@ -58,7 +58,6 @@ if(orderLocalStorage == undefined || orderLocalStorage == 0){
                     </div>
                 </article>
                 `;
-
                     document
                         .getElementById("cart__items")
                         .insertAdjacentHTML("afterbegin", cartItems);
@@ -82,7 +81,6 @@ if(orderLocalStorage == undefined || orderLocalStorage == 0){
                     
                     deletedItem[btn].addEventListener("click", (btnEvent) => {
                         btnEvent.preventDefault();
-                        console.log(btnEvent)
 
                         const parentD = btnEvent.target.closest("[data-id]");
 
@@ -156,7 +154,6 @@ const validFirstName = function(inputFirstName){
     }else{
         errorMsg.innerHTML ="Prénom Invalide";
     }
-    console.log(namesRegExp.test(form.firstName.value))
 };
 
 
@@ -179,7 +176,6 @@ const validLastName = function(inputLastName){
     }else{
          errorMsg.innerHTML ="Nom Invalide";
     }
-    console.log(namesRegExp.test(form.lastName.value))
 };
 
 
@@ -202,7 +198,6 @@ const validAddress = function(inputAddress){
     }else{
         errorMsg.innerHTML ="Adresse Invalide";
     }
-    console.log(addressRegExp.test(form.address.value))
 };
 
 
@@ -224,7 +219,6 @@ const validCity = function(inputCity){
     }else{
         errorMsg.innerHTML ="Ville Invalide";
     }
-    console.log(cityRegExp.test(form.city.value))
 };
 
 
@@ -247,7 +241,6 @@ const validEmail = function(inputEmail){
     }else{
         errorMsg.innerHTML ="Email Invalide";
     }
-    console.log((emailRegExp.test(form.email.value)))
 };
 
 
@@ -263,8 +256,6 @@ btnForm.addEventListener("click", (validEvent) => {
     addressRegExp.test(form.address.value) && 
     cityRegExp.test(form.city.value) && 
     emailRegExp.test(form.email.value);
-   
-    console.log(validForm)
 
 
     // Récupération des valeurs du formulaire
@@ -275,12 +266,10 @@ btnForm.addEventListener("click", (validEvent) => {
         city: document.getElementById("city").value,
         email: document.getElementById("email").value
     };
-    console.log(formulaireValues)
     
     // Contrôler la validité du formulaire avant l'envoie dans le LS
     if(validForm == "" || validForm == undefined || validForm == false){
         alert("Veuillez remplir le formulaire correctement")
-        console.log(validForm)
 
     } else if(orderLocalStorage == 0 || orderLocalStorage == null){
         alert ("Oupss...Votre panier est vide")
@@ -295,7 +284,6 @@ btnForm.addEventListener("click", (validEvent) => {
             idProduct.push(orderLocalStorage[pro].idProduct);
         }
 
-        console.log(idProduct)
         // Mettre les produits du panier ainsi que le formulaire dans un objet à envoyer vers l'API
         const order ={
             products : idProduct,
