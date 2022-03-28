@@ -1,10 +1,5 @@
-//Initialisation du localStorage 
-let orderLocalStorage = JSON.parse(localStorage.getItem("infoCart"));
 
-// Variable pour récupérer la classe où je vais injecter le code HTML
-const positionCartProduct = document.querySelector("#cartAndFormContainer");
-
-//Variables pour calculer le prix total 
+//Variables pour calculer la quantité d'article 
 let calculTotalQuantity = [];
 let totalQuantity = document.getElementById("totalQuantity");
 
@@ -12,44 +7,49 @@ let totalQuantity = document.getElementById("totalQuantity");
 let calculTotalPrice = [];
 let totalPrice =document.getElementById("totalPrice");
 
-
-//
+// Variable pour calculer le total de : calculTotalPrice et calculTotalQuantity
 const reducer = (accumulator, currentValue) => accumulator + currentValue;
 
-// Si le panier est vide : afficher le panier est vide
+//Initialisation du localStorage 
+let orderLocalStorage = localStorage.getItem("infoCart") != null ? JSON.parse(localStorage.getItem("infoCart")) : null;
 
-if(orderLocalStorage == undefined || orderLocalStorage == 0){
+// Variable pour récupérer la classe où je vais injecter le code HTML
+const positionCartProduct = document.querySelector("#cartAndFormContainer");
+
+
+// Affichage du panier vide
+if(orderLocalStorage === null || orderLocalStorage.length === 0){
+
     const emptyBasket = `
     <div id="cartAndFormContainer">
-        <div> Oupss... Votre panier est vide </div>
+        <div> Où sont vos articles ? Votre panier est vide !</div>
     </div>`;
 
     positionCartProduct.innerHTML = emptyBasket;
-
-}else{
-    // Si le panier n'est pas vide : afficher les produits dans le localStorage
-
-    orderLocalStorage.forEach((elt) => {
-       // Je récupère des infos dans l'API à partir de l'idProduct 
-        fetch( `http://localhost:3000/api/products/${elt.idProduct}`)
-            .then((elements) =>  elements.json())
-
-            .then((elements) => {
+}
+else{
+    // Si le panier n'est pas vide : afficher les produits qui sont stockés dans le localStorage
+    orderLocalStorage.forEach((articles) => {
+        // Je récupère des infos dans l'API à partir de l'idProduct 
+         fetch( `http://localhost:3000/api/products/${articles.idProduct}`)
+            .then((res) =>  res.json())
+ 
+            .then((couch) => {
                 const cartItems = `
-                <article class="cart__item" data-id="${elt.idProduct}" data-color="${elt.colorProduct}">
+                <article class="cart__item" data-id="${articles.idProduct}" data-color="${articles.colorProduct}">
                     <div class="cart__item__img">
-                        <img src="${elements.imageUrl}" alt="${elements.altTxt}">
+                        <img src="${couch.imageUrl}" alt="${couch.altTxt}">
                     </div>
                     <div class="cart__item__content">
                         <div class="cart__item__content__description">
-                        <h2>${elements.name}</h2>
-                        <p>${elt.colorProduct}</p>
-                        <p>${elements.price} €</p>
+                        <h2>${couch.name}</h2>
+                        <p>${articles.colorProduct}</p>
+                        <p>${couch.price} €</p>
                         </div>
                         <div class="cart__item__content__settings">
                         <div class="cart__item__content__settings__quantity">
                             <p>Qté : </p>
-                            <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${elt.quantityProduct}">
+                            <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${articles.quantityProduct}">
                         </div>
                         <div class="cart__item__content__settings__delete">
                             <p class="deleteItem">Supprimer</p>
@@ -64,35 +64,35 @@ if(orderLocalStorage == undefined || orderLocalStorage == 0){
 
 
                 //--------------------Calcul quantité d'articles dans le panier            
-                calculTotalQuantity.push( parseInt(`${elt.quantityProduct}`));
+                calculTotalQuantity.push( parseInt(`${articles.quantityProduct}`));
                 totalQuantity.innerHTML = calculTotalQuantity.reduce(reducer,0);                
-               
+            
 
                 // -------------------Montant total du panier ---------------------------------------------------                          
-                calculTotalPrice.push( parseInt(`${elt.quantityProduct}`) * parseInt(`${elements.price}`));
+                calculTotalPrice.push( parseInt(`${articles.quantityProduct}`) * parseInt(`${couch.price}`));
                 totalPrice.innerHTML = calculTotalPrice.reduce(reducer,0);                              
 
-
+ 
                 // -------------Supprimer un article du panier ET du localStorage---------------------------
-                
+                 
                 const deletedItem = document.getElementsByClassName("deleteItem");
-
+ 
                 for(let btn = 0; btn < deletedItem.length; btn++){
-                    
+                     
                     deletedItem[btn].addEventListener("click", (btnEvent) => {
                         btnEvent.preventDefault();
 
                         const parentD = btnEvent.target.closest("[data-id]");
-
-                        let newLocalStorage = orderLocalStorage.filter( 
-                           (productLocal)=> productLocal.idProduct !== parentD.dataset.id || productLocal.colorProduct !== parentD.dataset.color
+                        
+                        let newOrderLocalStorage = orderLocalStorage.filter( 
+                        (productLocal)=> productLocal.idProduct !== parentD.dataset.id || productLocal.colorProduct !== parentD.dataset.color
                         );
 
-                        localStorage.setItem("infoCart", JSON.stringify(newLocalStorage));
+                        localStorage.setItem("infoCart", JSON.stringify(newOrderLocalStorage));
                         alert(`L'article a bien été supprimé du panier`);
-                        location.reload();
+                        //location.reload();
                     })
-                };
+                 };
 
                 // -----------------------Modifier la quantité -----------------------------
                 const changeQuantity = document.getElementsByClassName("itemQuantity");
@@ -107,13 +107,16 @@ if(orderLocalStorage == undefined || orderLocalStorage == 0){
                         const oldQuantity = orderLocalStorage.find(
                             (first) => first.idProduct === parentQ.dataset.id && first.colorProduct === parentQ.dataset.color);
 
-                        let newQuantity = changeQuantity[c].valueAsNumber;                            
+                        let newQuantity = changeQuantity[c].value;                            
+                        
+                        if (newQuantity < 1 || newQuantity > 100){
+                            return alert("Choisissez une quantité entre 1 et 100");
+                        };
                         
                         oldQuantity.quantityProduct = newQuantity;
                         localStorage.setItem("infoCart", JSON.stringify(orderLocalStorage));
                         location.reload();
                     });
-                    
                 };
             })
         .catch((error) => {
@@ -128,209 +131,186 @@ if(orderLocalStorage == undefined || orderLocalStorage == 0){
 // Selection le formulaire dans le DOM
 const form = document.querySelector(".cart__order__form");
 
-// Création des RegExp
+// Création des Expressions Régulières (RegExp)
 let namesRegExp = new RegExp("^[a-zA-Zàâäéèêëïîôöùûüç' -]{2,}$");
 let addressRegExp = new RegExp("^[0-9]{1,4}[a-zA-Z0-9àâäéèêëïîôöùûüç '.,-]{3,}$");
 let cityRegExp = new RegExp("^[a-zA-Z0-9àâäéèêëïîôöùûüç' -]{3,60}$");
 let emailRegExp = new RegExp("^[a-zA-Z0-9àâäéèêëïîôöùûüç.-_]+[@]{1}[a-zA-Z0-9.-_]+[.][a-z]{2,10}$");
 
 
-// Ecouter la modification du PRENOM ------------------------------
-form.firstName.addEventListener("change", function () {
-    validFirstName(this);
-});
+// ********** Validation du PRENOM **********
+const firstName = document.getElementById("firstName");
 
-// ***** Validation du PRENOM *****
-const validFirstName = function(inputFirstName){
-
-    let errorMsg = inputFirstName.nextElementSibling;
-
-    if(namesRegExp.test(form.firstName.value)){
-        errorMsg.innerHTML ='Prénom Valide';
-
-    }else if (namesRegExp.test(form.firstName.value) == ""){
-        errorMsg.innerHTML ="Veuillez renseignez votre Prénom";
-
-    }else{
-        errorMsg.innerHTML ="Prénom Invalide";
-    }
+function validationFirstName(){
+    return namesRegExp.test(firstName.value);
 };
 
+// Ecouter la modification du PRENOM --------------------
+firstName.addEventListener("change", function (e) {
 
-// Ecouter la modification du NOM ------------------------------
-form.lastName.addEventListener("change", function () {
-    validLastName(this);
+    let errorMsg = firstName.nextElementSibling;
+    validationFirstName(firstName) ? errorMsg.innerHTML ="Nom Valide" :  errorMsg.innerHTML ="Veuillez renseignez votre Nom correctement";
 });
 
-const validLastName = function(inputLastName){
 
-     // ***** Validation du NOM *****
-     let errorMsg = inputLastName.nextElementSibling;
+// ********** Validation du NOM **********
+const lastName = document.getElementById("lastName");
 
-     if(namesRegExp.test(form.lastName.value)){
-         errorMsg.innerHTML ='Nom Valide';
+function validationLastName(){
+    return namesRegExp.test(lastName.value);
+};
 
-    }else if(namesRegExp.test(form.lastName.value) == "") { 
+// Ecouter la modification du NOM --------------------
+lastName.addEventListener("change", function (e) {
+    validationLastName(lastName);
+
+    let errorMsg = lastName.nextElementSibling;
+
+    if(validationLastName(lastName)){
+        errorMsg.innerHTML ='Nom Valide';
+    }
+    else { 
         errorMsg.innerHTML ="Veuillez renseignez votre Nom";
-
-    }else{
-         errorMsg.innerHTML ="Nom Invalide";
     }
-};
-
-
-// Ecouter la modification de l'ADRESSE ------------------------------
-form.address.addEventListener("change", function () {
-    validAddress(this);
 });
 
-// ***** Validation de  l'ADRESSE *****
-const validAddress = function(inputAddress){
 
-    let errorMsg = inputAddress.nextElementSibling;
+// ********** Validation de  l'ADRESSE **********
+const address = document.getElementById("address")
 
-    if(addressRegExp.test(form.address.value)){
-        errorMsg.innerHTML ='Adresse Valide';
-
-    }else if(addressRegExp.test(form.address.value) == "") { 
-        errorMsg.innerHTML ="Veuillez renseignez votre Adresse";
-
-    }else{
-        errorMsg.innerHTML ="Adresse Invalide";
-    }
+function validationAddress(){
+    return addressRegExp.test(address.value) 
 };
 
-
-// Ecouter la modification de la VILLE ------------------------------
-form.city.addEventListener("change", function() {
-    validCity(this);
+// Ecouter la modification de l'ADRESSE --------------------
+address.addEventListener("change", function (e) {
+    let errorMsg = address.nextElementSibling;
+    validationAddress(address) ? errorMsg.innerHTML ='Adresse Valide' : errorMsg.innerHTML ="Veuillez renseignez votre Adresse";
 });
 
-const validCity = function(inputCity){
 
-    let errorMsg = inputCity.nextElementSibling;
+// ********** Validation de la VILLE **********
+const city = document.getElementById("city");
 
-    if(cityRegExp.test(form.city.value)){
+function validationCity(){
+    return cityRegExp.test(city.value)
+};
+
+// Ecouter la modification de la VILLE --------------------
+city.addEventListener("change", function(e) {
+    validationCity(city);
+    let errorMsg = city.nextElementSibling;
+
+    if(validationCity(city)){
         errorMsg.innerHTML ="Ville Valide";
-
-    }else if(cityRegExp.test(form.city.value) == "") { 
+    
+    }else{ 
         errorMsg.innerHTML ="Veuillez renseignez votre Ville";
-
-    }else{
-        errorMsg.innerHTML ="Ville Invalide";
     }
-};
-
-
-// Ecouter la modification de l'EMAIL ------------------------------
-form.email.addEventListener("change", function (){
-    validEmail(this);
 });
 
-//***** Validation email *****
-const validEmail = function(inputEmail){
 
-    let errorMsg = inputEmail.nextElementSibling;
+//********** Validation de l'EMAIL **********
+const email = document.getElementById("email");
 
-    if(emailRegExp.test(form.email.value)){
-        errorMsg.innerHTML ="Email Valide";
-
-    }else if(emailRegExp.test(form.email.value) == "") { 
-        errorMsg.innerHTML ="Veuillez renseignez votre Email";
-
-    }else{
-        errorMsg.innerHTML ="Email Invalide";
-    }
+function validationEmail (e){
+    return emailRegExp.test(email.value);
 };
+
+// Ecouter la modification de l'EMAIL --------------------
+email.addEventListener("change", function (){
+    let errorMsg = email.nextElementSibling;
+    validationEmail(email) ? errorMsg.innerHTML ="Email Valide" : errorMsg.innerHTML ="Veuillez renseignez votre Email";
+});
 
 
 // Ecouter la soumission du FORMULAIRE via le bouton ------------------------------
 const btnForm = document.getElementById("order");
+
 btnForm.addEventListener("click", (validEvent) => {
     validEvent.preventDefault();
 
+    // Récupération des valeurs du formulaire
+    const firstName = document.getElementById("firstName").value;
+    const lastName = document.getElementById("lastName").value;
+    const address = document.getElementById("address").value;
+    const city = document.getElementById("city").value;
+    const email = document.getElementById("email").value;
 
     // Vérification de validité du formulaire 
-    let validForm = namesRegExp.test(form.firstName.value) && 
-    namesRegExp.test(form.lastName.value )&& 
-    addressRegExp.test(form.address.value) && 
-    cityRegExp.test(form.city.value) && 
-    emailRegExp.test(form.email.value);
+    let formVerified =
+    validationFirstName(firstName) && 
+    validationLastName(lastName) && 
+    validationAddress(address) && 
+    validationCity(city) && 
+    validationEmail(email);
 
-
-    // Récupération des valeurs du formulaire
-    const formulaireValues = {
-        firstName: document.getElementById("firstName").value,
-        lastName: document.getElementById("lastName").value,
-        address: document.getElementById("address").value,
-        city: document.getElementById("city").value,
-        email: document.getElementById("email").value
-    };
-    
     // Contrôler la validité du formulaire avant l'envoie dans le LS
-    if(validForm == "" || validForm == undefined || validForm == false){
+    if(!formVerified){
         alert("Veuillez remplir le formulaire correctement")
-
-    } else if(orderLocalStorage == 0 || orderLocalStorage == null){
-        alert ("Oupss...Votre panier est vide")
 
     } else {
         // Mettre formulaireValues dans le local storage
         alert("Vos informations ont bien été enregistrées")
 
-        // Construire un array depuis le LS
-        let idProduct = [];
-        for(let pro = 0; pro < orderLocalStorage.length; pro++){
-            idProduct.push(orderLocalStorage[pro].idProduct);
+        // Construire un tableau de produits commandé
+        let idsProducts = [];
+        for(let i = 0; i < orderLocalStorage.length; i++){
+            idsProducts.push(orderLocalStorage[i].idProduct);
         }
 
         // Mettre les produits du panier ainsi que le formulaire dans un objet à envoyer vers l'API
-        const order ={
-            products : idProduct,
-            contact :formulaireValues
+        const orderDetails ={
+            products : idsProducts,
+            contact : {
+                firstName: firstName,
+                lastName : lastName,
+                address : address,
+                city : city,
+                email : email,
+            },
         };
-        console.log(order)
 
         // Envoie de l'objet infosToSend vers le serveur
         fetch("http://localhost:3000/api/products/order",{
             method: "POST",
-            body : JSON.stringify(order),
+            body : JSON.stringify(orderDetails),
             headers: {
                 "Accept" : "Application/JSON",
                 "Content-Type": "Application/JSON"},
             })
     
-            .then(async(response) => response.json())     
-            
+            .then((response) => response.json())     
             .then((data)=> {
-                console.log(data)
-                console.log(data.orderId);
-                localStorage.setItem("orderId", data.orderId);
-                window.location.href = "confirmation.html";
+            
+                // Récupération de data-orderId 
+                orderIdNumber = `${data.orderId}`;
+
+                // Nettoyer le LocalStorage après validation de la commande
+                localStorage.clear();
+
+                //window.location.href = `./confirmation.html?id-order=${orderIdNumber}`;
             })
             .catch((error)=>{
                 console.error('Error du server: le problème sera réglé ultérieurement', error);
                 alert("Un problème a été détecté au niveau du fetch, il sera réglé très prochainement !");
             })
-           
     };
-    
 });
 
 //--------------------Informations Formulaire statiques ------------------------------------------
 // Prendre la key dans le localStorage et la mettre dans une variable
-const dataLocalStorage = localStorage.getItem("formulaireValues");
+const dataFormLocalStorage = localStorage.getItem("formulaireValues");
 
 // Convertir la chaine de caractère en objet javaScript
-const dataLocalStorageObject = JSON.parse(dataLocalStorage);
+const dataFormLocalStorageObject = JSON.parse(dataFormLocalStorage);
 
 // Mettre le contenu du localStorage dans les champs du formulaire
 function fillUpForm(input){
-
-    if(dataLocalStorageObject == null){
+    if(dataFormLocalStorageObject == null){
     } 
     else{
-    document.querySelector(`#${input}`).value = dataLocalStorageObject[input];
+    document.querySelector(`#${input}`).value = dataFormLocalStorageObject[input];
     }
 };
 

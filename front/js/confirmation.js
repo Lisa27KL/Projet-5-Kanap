@@ -1,5 +1,9 @@
-// Récupération de orderId et insertion dans le HTML
-document.getElementById("orderId").innerHTML = JSON.stringify(localStorage.getItem("orderId"));
+// Récupération du numéro de commande par son URL
+let urlConfirmationOrder = new URLSearchParams(document.location.search);
+let orderIdNumber = urlConfirmationOrder.get("id-order");
 
-// Effacer tout le localStorage
-localStorage.clear();
+// Récupérer l'id orderId pour pouvoir afficher le numéro de commande 
+const orderId =document.querySelector("#orderId");
+
+// Affichage du numéro de commande
+orderId.innerHTML = orderIdNumber;

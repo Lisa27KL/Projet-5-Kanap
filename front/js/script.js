@@ -5,16 +5,15 @@ fetch('http://localhost:3000/api/products')
     })
     .then(function(data) {
         const items = document.getElementById("items");
-        data.forEach(element => {
+        data.forEach(item => {
             items.innerHTML += 
-            `<a href ="./product.html?id=${element._id}"> 
+            `<a href ="./product.html?id=${item._id}"> 
                 <article>
-                    <img src=${element.imageUrl} ${element.altTxt}> 
-                    <h3> ${element.name}</h3> 
-                    <p> ${element.description} </p> 
+                    <img src=${item.imageUrl} ${item.altTxt}> 
+                    <h3> ${item.name}</h3> 
+                    <p> ${item.description} </p> 
                 </article> 
             </a> `;
-        
         })
     })
     .catch((error) => {
