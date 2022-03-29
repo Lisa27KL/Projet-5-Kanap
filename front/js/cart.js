@@ -89,8 +89,8 @@ else{
                         );
 
                         localStorage.setItem("infoCart", JSON.stringify(newOrderLocalStorage));
-                        alert(`L'article a bien été supprimé du panier`);
-                        //location.reload();
+                        alert("L'article a bien été supprimé du panier");
+                        location.reload();
                     })
                  };
 
@@ -134,7 +134,7 @@ const form = document.querySelector(".cart__order__form");
 // Création des Expressions Régulières (RegExp)
 let namesRegExp = new RegExp("^[a-zA-Zàâäéèêëïîôöùûüç' -]{2,}$");
 let addressRegExp = new RegExp("^[0-9]{1,4}[a-zA-Z0-9àâäéèêëïîôöùûüç '.,-]{3,}$");
-let cityRegExp = new RegExp("^[a-zA-Z0-9àâäéèêëïîôöùûüç' -]{3,60}$");
+let cityRegExp = new RegExp("^[a-zA-Zàâäéèêëïîôöùûüç' -]{3,60}$");
 let emailRegExp = new RegExp("^[a-zA-Z0-9àâäéèêëïîôöùûüç.-_]+[@]{1}[a-zA-Z0-9.-_]+[.][a-z]{2,10}$");
 
 
@@ -149,7 +149,7 @@ function validationFirstName(){
 firstName.addEventListener("change", function (e) {
 
     let errorMsg = firstName.nextElementSibling;
-    validationFirstName(firstName) ? errorMsg.innerHTML ="Nom Valide" :  errorMsg.innerHTML ="Veuillez renseignez votre Nom correctement";
+    validationFirstName(firstName) ? errorMsg.innerHTML ="Prénom Valide" :  errorMsg.innerHTML ="INVALIDE ~ Veuillez renseignez votre Prénom correctement";
 });
 
 
@@ -170,7 +170,7 @@ lastName.addEventListener("change", function (e) {
         errorMsg.innerHTML ='Nom Valide';
     }
     else { 
-        errorMsg.innerHTML ="Veuillez renseignez votre Nom";
+        errorMsg.innerHTML ="INVALIDE ~ Veuillez renseignez votre Nom correctement";
     }
 });
 
@@ -185,7 +185,7 @@ function validationAddress(){
 // Ecouter la modification de l'ADRESSE --------------------
 address.addEventListener("change", function (e) {
     let errorMsg = address.nextElementSibling;
-    validationAddress(address) ? errorMsg.innerHTML ='Adresse Valide' : errorMsg.innerHTML ="Veuillez renseignez votre Adresse";
+    validationAddress(address) ? errorMsg.innerHTML ='Adresse Valide' : errorMsg.innerHTML ="INVALIDE ~ Veuillez renseignez votre Adresse";
 });
 
 
@@ -205,7 +205,7 @@ city.addEventListener("change", function(e) {
         errorMsg.innerHTML ="Ville Valide";
     
     }else{ 
-        errorMsg.innerHTML ="Veuillez renseignez votre Ville";
+        errorMsg.innerHTML ="INVALIDE ~ Veuillez renseignez votre Ville";
     }
 });
 
@@ -220,7 +220,7 @@ function validationEmail (e){
 // Ecouter la modification de l'EMAIL --------------------
 email.addEventListener("change", function (){
     let errorMsg = email.nextElementSibling;
-    validationEmail(email) ? errorMsg.innerHTML ="Email Valide" : errorMsg.innerHTML ="Veuillez renseignez votre Email";
+    validationEmail(email) ? errorMsg.innerHTML ="Email Valide" : errorMsg.innerHTML ="INVALIDE ~ Veuillez renseignez votre Email";
 });
 
 
@@ -288,8 +288,9 @@ btnForm.addEventListener("click", (validEvent) => {
 
                 // Nettoyer le LocalStorage après validation de la commande
                 localStorage.clear();
-
-                //window.location.href = `./confirmation.html?id-order=${orderIdNumber}`;
+                
+                // lien vers la page confirmation
+                window.location.href = `./confirmation.html?id-order=${orderIdNumber}`;
             })
             .catch((error)=>{
                 console.error('Error du server: le problème sera réglé ultérieurement', error);
@@ -297,27 +298,3 @@ btnForm.addEventListener("click", (validEvent) => {
             })
     };
 });
-
-//--------------------Informations Formulaire statiques ------------------------------------------
-// Prendre la key dans le localStorage et la mettre dans une variable
-const dataFormLocalStorage = localStorage.getItem("formulaireValues");
-
-// Convertir la chaine de caractère en objet javaScript
-const dataFormLocalStorageObject = JSON.parse(dataFormLocalStorage);
-
-// Mettre le contenu du localStorage dans les champs du formulaire
-function fillUpForm(input){
-    if(dataFormLocalStorageObject == null){
-    } 
-    else{
-    document.querySelector(`#${input}`).value = dataFormLocalStorageObject[input];
-    }
-};
-
-fillUpForm("firstName");
-fillUpForm("lastName");
-fillUpForm("address");
-fillUpForm("city");
-fillUpForm("email");
-//----------------Informations Formulaire statiques ------FIN ------------------------------------
-

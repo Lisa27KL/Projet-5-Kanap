@@ -105,14 +105,10 @@ const button = document.getElementById("addToCart")
 
                 // Si la quantité de produit + quantité du Local Storage >100
                 let localQuantity = infoCart.quantityProduct;
-                console.log(localQuantity);
                 let addQuantity = checkBasket.quantityProduct;
-                console.log(addQuantity);
                 let maxQuantity = parseInt(addQuantity) + parseInt(localQuantity);
-                console.log(maxQuantity)
                 if(maxQuantity > 100){
-                    console.log(maxQuantity > 100)
-                    return alert ("Attention, vous avez plus de 100 articles dans votre panier")
+                    return alert ("Attention, vous ne pouvez avoir plus de 100 articles dans votre panier")
                 };
             }
             else{
