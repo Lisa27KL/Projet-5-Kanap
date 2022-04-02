@@ -1,19 +1,13 @@
-
-//Variables pour calculer la quantité d'article 
 let calculTotalQuantity = [];
 let totalQuantity = document.getElementById("totalQuantity");
 
-//Variables pour calculer le prix total 
 let calculTotalPrice = [];
 let totalPrice =document.getElementById("totalPrice");
 
-// Variable pour calculer le total de : calculTotalPrice et calculTotalQuantity
 const reducer = (accumulator, currentValue) => accumulator + currentValue;
 
-//Initialisation du localStorage 
 let orderLocalStorage = localStorage.getItem("infoCart") != null ? JSON.parse(localStorage.getItem("infoCart")) : null;
 
-// Variable pour récupérer la classe où je vais injecter le code HTML
 const positionCartProduct = document.querySelector("#cartAndFormContainer");
 
 
@@ -30,7 +24,6 @@ if(orderLocalStorage === null || orderLocalStorage.length === 0){
 else{
     // Si le panier n'est pas vide : afficher les produits qui sont stockés dans le localStorage
     orderLocalStorage.forEach((articles) => {
-        // Je récupère des infos dans l'API à partir de l'idProduct 
          fetch( `http://localhost:3000/api/products/${articles.idProduct}`)
             .then((res) =>  res.json())
  
@@ -137,30 +130,24 @@ let addressRegExp = new RegExp("^[0-9]{1,4}[a-zA-Z0-9àâäéèêëïîôöùû�
 let cityRegExp = new RegExp("^[a-zA-Zàâäéèêëïîôöùûüç' -]{3,60}$");
 let emailRegExp = new RegExp("^[a-zA-Z0-9àâäéèêëïîôöùûüç.-_]+[@]{1}[a-zA-Z0-9.-_]+[.][a-z]{2,10}$");
 
-
-// ********** Validation du PRENOM **********
 const firstName = document.getElementById("firstName");
 
 function validationFirstName(){
     return namesRegExp.test(firstName.value);
 };
 
-// Ecouter la modification du PRENOM --------------------
 firstName.addEventListener("change", function (e) {
 
     let errorMsg = firstName.nextElementSibling;
     validationFirstName(firstName) ? errorMsg.innerHTML ="Prénom Valide" :  errorMsg.innerHTML ="INVALIDE ~ Veuillez renseignez votre Prénom correctement";
 });
 
-
-// ********** Validation du NOM **********
 const lastName = document.getElementById("lastName");
 
 function validationLastName(){
     return namesRegExp.test(lastName.value);
 };
 
-// Ecouter la modification du NOM --------------------
 lastName.addEventListener("change", function (e) {
     validationLastName(lastName);
 
@@ -174,29 +161,23 @@ lastName.addEventListener("change", function (e) {
     }
 });
 
-
-// ********** Validation de  l'ADRESSE **********
 const address = document.getElementById("address")
 
 function validationAddress(){
     return addressRegExp.test(address.value) 
 };
 
-// Ecouter la modification de l'ADRESSE --------------------
 address.addEventListener("change", function (e) {
     let errorMsg = address.nextElementSibling;
     validationAddress(address) ? errorMsg.innerHTML ='Adresse Valide' : errorMsg.innerHTML ="INVALIDE ~ Veuillez renseignez votre Adresse";
 });
 
-
-// ********** Validation de la VILLE **********
 const city = document.getElementById("city");
 
 function validationCity(){
     return cityRegExp.test(city.value)
 };
 
-// Ecouter la modification de la VILLE --------------------
 city.addEventListener("change", function(e) {
     validationCity(city);
     let errorMsg = city.nextElementSibling;
@@ -209,22 +190,18 @@ city.addEventListener("change", function(e) {
     }
 });
 
-
-//********** Validation de l'EMAIL **********
 const email = document.getElementById("email");
 
 function validationEmail (e){
     return emailRegExp.test(email.value);
 };
 
-// Ecouter la modification de l'EMAIL --------------------
 email.addEventListener("change", function (){
     let errorMsg = email.nextElementSibling;
     validationEmail(email) ? errorMsg.innerHTML ="Email Valide" : errorMsg.innerHTML ="INVALIDE ~ Veuillez renseignez votre Email";
 });
 
 
-// Ecouter la soumission du FORMULAIRE via le bouton ------------------------------
 const btnForm = document.getElementById("order");
 
 btnForm.addEventListener("click", (validEvent) => {
@@ -250,16 +227,13 @@ btnForm.addEventListener("click", (validEvent) => {
         alert("Veuillez remplir le formulaire correctement")
 
     } else {
-        // Mettre formulaireValues dans le local storage
         alert("Vos informations ont bien été enregistrées")
 
-        // Construire un tableau de produits commandé
         let idsProducts = [];
         for(let i = 0; i < orderLocalStorage.length; i++){
             idsProducts.push(orderLocalStorage[i].idProduct);
         }
 
-        // Mettre les produits du panier ainsi que le formulaire dans un objet à envoyer vers l'API
         const orderDetails ={
             products : idsProducts,
             contact : {
@@ -271,7 +245,6 @@ btnForm.addEventListener("click", (validEvent) => {
             },
         };
 
-        // Envoie de l'objet infosToSend vers le serveur
         fetch("http://localhost:3000/api/products/order",{
             method: "POST",
             body : JSON.stringify(orderDetails),
@@ -283,13 +256,10 @@ btnForm.addEventListener("click", (validEvent) => {
             .then((response) => response.json())     
             .then((data)=> {
             
-                // Récupération de data-orderId 
                 orderIdNumber = `${data.orderId}`;
 
-                // Nettoyer le LocalStorage après validation de la commande
                 localStorage.clear();
                 
-                // lien vers la page confirmation
                 window.location.href = `./confirmation.html?id-order=${orderIdNumber}`;
             })
             .catch((error)=>{

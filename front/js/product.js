@@ -11,24 +11,18 @@ fetch( `http://localhost:3000/api/products/${_id}`)
         return response.json()})
 
     .then((product) => {
-        //Titre de la page produit
         document.querySelector("title").innerHTML = `${product.name}`;
 
-        //Nom du produit
         document.getElementById('title').innerHTML = `${product.name}`;
 
-        //Description du produit
         document.getElementById('description').innerHTML = `${product.description}`;
 
-        //Prix du produit
         document.getElementById('price').innerHTML =`${product.price}`;
 
-        //Image du produit
         document
         .getElementsByClassName('item__img')[0]
         .insertAdjacentHTML ("afterbegin",`<img src=${product.imageUrl} alt=${product.altTxt}>`);
 
-        //Options des couleurs du produit
         const select =document.getElementById('colors')
         
         product.colors.forEach((color) => {
@@ -43,15 +37,11 @@ fetch( `http://localhost:3000/api/products/${_id}`)
         console.error('Error du server: le problème sera réglé ultérieurement', error)
     });
 
-
-
-// Variables déclarées ici pour les appeler quand il le faut 
 const color = document.getElementById("colors");
 const quantity = document.getElementById("quantity");
 let basketLists = [];
 
 
-//Variable action -> popup de confirmation de démarche à suivre
 const popupConfirmation = () =>{
     if(window.confirm(` L'article ${title.innerHTML} au prix de ${price.innerHTML} € a bien été ajouté au panier.
     OK pour consultez le panier, ANNULER pour continuer`)){
@@ -61,7 +51,6 @@ const popupConfirmation = () =>{
 
 const button = document.getElementById("addToCart")
 
-    // Evenement-Ecouter lors du click du bouton pour ajouter au panier
     .addEventListener("click", (buttonEvent) =>{ 
         buttonEvent.preventDefault();
         
@@ -95,7 +84,6 @@ const button = document.getElementById("addToCart")
     //-------------------------------------------------------------------------------------      
         // Sinon le LS contient des produits :
         else{
-            // Récupérer le produit que l'on veut mettre dans le LS du LS (find)          
             let basket = JSON.parse(localStorage.getItem("infoCart"));
             const checkBasket = basket.find(p => p.colorProduct === infoCart.colorProduct && p.idProduct === infoCart.idProduct);
             
@@ -103,7 +91,6 @@ const button = document.getElementById("addToCart")
             if(checkBasket != undefined){ 
                 checkBasket.quantityProduct += infoCart.quantityProduct;
 
-                // Si la quantité de produit + quantité du Local Storage >100
                 let localQuantity = infoCart.quantityProduct;
                 let addQuantity = checkBasket.quantityProduct;
                 let maxQuantity = parseInt(addQuantity) + parseInt(localQuantity);
